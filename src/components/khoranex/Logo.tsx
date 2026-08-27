@@ -1,4 +1,4 @@
-import logo from "@/assets/khoranex-logo.png.asset.json";
+import logo from "@/assets/LOGO.png";
 
 export function Logo({
   className = "",
@@ -10,7 +10,7 @@ export function Logo({
   return (
     <span className={`flex items-center gap-2 ${className}`}>
       <img
-        src={logo.url}
+        src={logo}
         alt="Khoranex logo"
         width={36}
         height={36}
