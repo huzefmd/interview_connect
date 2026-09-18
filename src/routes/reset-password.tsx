@@ -5,15 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Logo } from "@/components/khoranex/Logo";
+import { Logo } from "@/components/jobsync/Logo";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Reset your Khoranex password" },
-      { name: "description", content: "Choose a new password for your Khoranex account." },
-      { property: "og:title", content: "Reset your Khoranex password" },
-      { property: "og:description", content: "Choose a new password for your Khoranex account." },
+      { title: "Reset your JobSync password" },
+      { name: "description", content: "Choose a new password for your JobSync account." },
+      { property: "og:title", content: "Reset your JobSync password" },
+      { property: "og:description", content: "Choose a new password for your JobSync account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

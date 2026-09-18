@@ -78,18 +78,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Khoranex — Campus Placement & Recruitment Platform" },
+      { title: "JobSync — Campus Placement & Recruitment Platform" },
       {
         name: "description",
         content:
-          "Khoranex connects colleges, employers and students for end-to-end campus placements.",
+          "JobSync connects colleges, employers and students for end-to-end campus placements.",
       },
-      { name: "author", content: "Khoranex" },
-      { property: "og:title", content: "Khoranex — Campus Placement & Recruitment Platform" },
+      { name: "author", content: "JobSync" },
+      { property: "og:title", content: "JobSync — Campus Placement & Recruitment Platform" },
       {
         property: "og:description",
         content:
-          "Khoranex connects colleges, employers and students for end-to-end campus placements.",
+          "JobSync connects colleges, employers and students for end-to-end campus placements.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

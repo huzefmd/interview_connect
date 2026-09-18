@@ -1,5 +1,5 @@
 import { GraduationCap, Building2, Users } from "lucide-react";
-import logo from "@/assets/LOGO.png";
+import logo from "@/assets/logo.jpeg";
 
 const nodes = [
   { icon: GraduationCap, label: "Colleges", pos: "left-0 top-6" },
@@ -20,7 +20,7 @@ export function HeroGraphic() {
       />
       <img
         src={logo}
-        alt="Khoranex connects colleges, employers and students"
+        alt="JobSync connects colleges, employers and students"
         className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 object-contain sm:h-48 sm:w-48"
       />
       {nodes.map(({ icon: Icon, label, pos }) => (

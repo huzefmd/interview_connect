@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
-export function UniversityDashboard({ userId }: { userId: string }) {
+export function CollegeDashboard({ userId }: { userId: string }) {
   const queryClient = useQueryClient();
   const [q, setQ] = useState("");
 
@@ -66,7 +66,7 @@ export function UniversityDashboard({ userId }: { userId: string }) {
 
   return (
     <div>
-      <PageHeader title="University dashboard" subtitle="Manage students, verify profiles and track placements." />
+      <PageHeader title="College dashboard" subtitle="Manage students, verify profiles and track placements." />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={Users} label="Students" value={students.length} />

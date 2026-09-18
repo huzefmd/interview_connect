@@ -13,9 +13,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const Route = createFileRoute("/_authenticated/interviews")({
   head: () => ({
     meta: [
-      { title: "Your Khoranex interviews" },
+      { title: "Your JobSync interviews" },
       { name: "description", content: "Join scheduled interviews and review past interview feedback." },
-      { property: "og:title", content: "Your Khoranex interviews" },
+      { property: "og:title", content: "Your JobSync interviews" },
       { property: "og:description", content: "Join scheduled interviews and review past interview feedback." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

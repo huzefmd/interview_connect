@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "student" | "university" | "employer";
+export type AppRole = "student" | "university" | "employer" | "admin";
 
 export function useUser() {
   const [user, setUser] = useState<User | null>(null);
@@ -28,6 +28,7 @@ export function useMyRole(userId: string | undefined) {
   return useQuery({
     queryKey: ["role", userId],
     enabled: !!userId,
+    staleTime: 1000 * 60 * 60, // Role rarely changes, cache for 1 hour
     queryFn: async (): Promise<AppRole | null> => {
       const { data, error } = await supabase
         .from("user_roles")

@@ -13,10 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedInterviewsRouteImport } from './routes/_authenticated/interviews'
 import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/jobs'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedInterviewIdRouteImport } from './routes/_authenticated/interview.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -38,6 +40,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -58,6 +65,12 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminDashboardRoute =
+  AuthenticatedAdminDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedInterviewIdRoute =
   AuthenticatedInterviewIdRouteImport.update({
     id: '/interview/$id',
@@ -69,20 +82,24 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/interviews': typeof AuthenticatedInterviewsRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/interview/$id': typeof AuthenticatedInterviewIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/interviews': typeof AuthenticatedInterviewsRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/interview/$id': typeof AuthenticatedInterviewIdRoute
 }
 export interface FileRoutesById {
@@ -91,10 +108,12 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/interviews': typeof AuthenticatedInterviewsRoute
   '/_authenticated/jobs': typeof AuthenticatedJobsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/interview/$id': typeof AuthenticatedInterviewIdRoute
 }
 export interface FileRouteTypes {
@@ -103,20 +122,24 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/admin'
     | '/dashboard'
     | '/interviews'
     | '/jobs'
     | '/profile'
+    | '/admin/dashboard'
     | '/interview/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/admin'
     | '/dashboard'
     | '/interviews'
     | '/jobs'
     | '/profile'
+    | '/admin/dashboard'
     | '/interview/$id'
   id:
     | '__root__'
@@ -124,10 +147,12 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/interviews'
     | '/_authenticated/jobs'
     | '/_authenticated/profile'
+    | '/_authenticated/admin/dashboard'
     | '/_authenticated/interview/$id'
   fileRoutesById: FileRoutesById
 }
@@ -168,6 +193,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -196,6 +228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/dashboard': {
+      id: '/_authenticated/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/interview/$id': {
       id: '/_authenticated/interview/$id'
       path: '/interview/$id'
@@ -206,7 +245,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInterviewsRoute: typeof AuthenticatedInterviewsRoute
   AuthenticatedJobsRoute: typeof AuthenticatedJobsRoute
@@ -215,6 +266,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInterviewsRoute: AuthenticatedInterviewsRoute,
   AuthenticatedJobsRoute: AuthenticatedJobsRoute,

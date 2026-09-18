@@ -22,10 +22,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "Your Khoranex profile" },
-      { name: "description", content: "Keep your Khoranex profile up to date so you get matched faster." },
-      { property: "og:title", content: "Your Khoranex profile" },
-      { property: "og:description", content: "Keep your Khoranex profile up to date so you get matched faster." },
+      { title: "Your JobSync profile" },
+      { name: "description", content: "Keep your JobSync profile up to date so you get matched faster." },
+      { property: "og:title", content: "Your JobSync profile" },
+      { property: "og:description", content: "Keep your JobSync profile up to date so you get matched faster." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -89,6 +89,7 @@ function ProfilePage() {
       hr_email: str(d["hr_email"]),
       hr_phone: str(d["hr_phone"]),
       logo_url: str(d["logo_url"]),
+      id_proof_url: str(d["id_proof_url"]),
     });
     const path = data.base?.avatar_url;
     if (path) {
@@ -98,7 +99,7 @@ function ProfilePage() {
 
   const set = (k: string) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  async function uploadFile(bucket: "avatars" | "resumes", file: File) {
+  async function uploadFile(bucket: "avatars" | "resumes" | "employer-docs", file: File) {
     const ext = file.name.split(".").pop();
     const path = `${user!.id}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
@@ -132,6 +133,23 @@ function ProfilePage() {
       setForm((f) => ({ ...f, resume_url: path }));
       await supabase.from("student_profiles").upsert({ user_id: user.id, resume_url: path });
       toast.success("Resume uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    }
+  }
+
+  async function onProof(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.type !== "application/pdf" && !file.type.startsWith("image/")) {
+      toast.error("Proof must be a PDF or image");
+      return;
+    }
+    try {
+      const path = await uploadFile("employer-docs", file);
+      setForm((f) => ({ ...f, id_proof_url: path }));
+      await supabase.from("employer_profiles").upsert({ user_id: user.id, id_proof_url: path });
+      toast.success("Verification document uploaded");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     }
@@ -180,6 +198,7 @@ function ProfilePage() {
           hr_name: form["hr_name"] || null,
           hr_email: form["hr_email"] || null,
           hr_phone: form["hr_phone"] || null,
+          id_proof_url: form["id_proof_url"] || null,
         };
       }
 
@@ -229,7 +248,7 @@ function ProfilePage() {
               <Field label="Location" value={form["location"] ?? ""} onChange={set("location")} />
               <Field label="Date of birth" type="date" value={form["date_of_birth"] ?? ""} onChange={set("date_of_birth")} />
               <div className="space-y-2">
-                <Label>University</Label>
+                <Label>College</Label>
                 <Select
                   value={form["university_id"] ?? ""}
                   onValueChange={(v) => setForm((f) => ({ ...f, university_id: v }))}
@@ -291,6 +310,15 @@ function ProfilePage() {
             <div className="space-y-2">
               <Label htmlFor="description">About the company</Label>
               <Textarea id="description" rows={4} value={form["description"] ?? ""} onChange={set("description")} maxLength={2000} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="id_proof">Verification Document (PDF or Image)</Label>
+              <Input id="id_proof" type="file" accept="application/pdf,image/*" onChange={onProof} />
+              {form["id_proof_url"] && (
+                <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <FileText className="h-3.5 w-3.5" /> Document uploaded
+                </p>
+              )}
             </div>
           </>
         )}

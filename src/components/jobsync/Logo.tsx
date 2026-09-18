@@ -1,4 +1,4 @@
-import logo from "@/assets/LOGO.png";
+import logo from "@/assets/logo.jpeg";
 
 export function Logo({
   className = "",
@@ -11,7 +11,7 @@ export function Logo({
     <span className={`flex items-center gap-2 ${className}`}>
       <img
         src={logo}
-        alt="Khoranex logo"
+        alt="JobSync logo"
         width={36}
         height={36}
         className="h-9 w-9 shrink-0 object-contain"
@@ -21,7 +21,7 @@ export function Logo({
           variant === "light" ? "text-primary-foreground" : "text-foreground"
         }`}
       >
-        Khoranex
+        JobSync
       </span>
     </span>
   );

@@ -7,18 +7,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Navbar } from "@/components/khoranex/Navbar";
-import { Footer } from "@/components/khoranex/Footer";
-import { Reveal } from "@/components/khoranex/Reveal";
-import { StatCounter } from "@/components/khoranex/StatCounter";
-import { PillarCard } from "@/components/khoranex/PillarCard";
-import { TestimonialCard, type Testimonial } from "@/components/khoranex/TestimonialCard";
-import { LogoMarquee, LogoMark } from "@/components/khoranex/LogoStrip";
-import { HeroGraphic } from "@/components/khoranex/HeroGraphic";
+import { Navbar } from "@/components/jobsync/Navbar";
+import { Footer } from "@/components/jobsync/Footer";
+import { Reveal } from "@/components/jobsync/Reveal";
+import { StatCounter } from "@/components/jobsync/StatCounter";
+import { PillarCard } from "@/components/jobsync/PillarCard";
+import { TestimonialCard, type Testimonial } from "@/components/jobsync/TestimonialCard";
+import { LogoMarquee, LogoMark } from "@/components/jobsync/LogoStrip";
+import { HeroGraphic } from "@/components/jobsync/HeroGraphic";
 
-const TITLE = "Khoranex — Where Talent Meets Opportunity";
+const TITLE = "JobSync — Where Talent Meets Opportunity";
 const DESCRIPTION =
-  "Khoranex is the campus placement platform connecting colleges, employers and students — automate placements, hire young talent faster, and land your first job.";
+  "JobSync is the campus placement platform connecting colleges, employers and students — automate placements, hire young talent faster, and land your first job.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -98,7 +98,7 @@ const press = ["The Daily Ledger", "Tech Chronicle", "Business Standard Weekly",
 const testimonials: Testimonial[] = [
   {
     quote:
-      "Our placement season used to run on spreadsheets and late-night phone calls. With Khoranex, scheduling 4,000 interviews took an afternoon.",
+      "Our placement season used to run on spreadsheets and late-night phone calls. With JobSync, scheduling 4,000 interviews took an afternoon.",
     name: "Dr. Ananya Rao",
     title: "Head of Training & Placements",
     institution: "Northfield Institute of Technology",
@@ -122,7 +122,7 @@ const testimonials: Testimonial[] = [
   },
   {
     quote:
-      "We onboarded 180 recruiters in a single season. Khoranex handled the volume without a single scheduling clash.",
+      "We onboarded 180 recruiters in a single season. JobSync handled the volume without a single scheduling clash.",
     name: "Rahul Menon",
     title: "Director of Corporate Relations",
     institution: "Grantham University",
@@ -159,7 +159,7 @@ function Index() {
                 Where Talent Meets <span className="text-gradient-brand">Opportunity</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                Khoranex helps students get their first jobs, enables employers to recruit
+                JobSync helps students get their first jobs, enables employers to recruit
                 faster, and helps colleges streamline campus placements.
               </p>
               <div className="mt-9">
@@ -232,10 +232,10 @@ function Index() {
         <section className="mx-auto max-w-7xl px-5 py-24">
           <Reveal className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Why colleges love Khoranex
+              Why colleges love JobSync
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Placement teams across the country run their season on Khoranex.
+              Placement teams across the country run their season on JobSync.
             </p>
           </Reveal>
 

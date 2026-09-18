@@ -1,16 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useUser, useMyRole } from "@/hooks/useAuth";
 import { StudentDashboard } from "@/components/dashboards/StudentDashboard";
-import { UniversityDashboard } from "@/components/dashboards/UniversityDashboard";
+import { CollegeDashboard } from "@/components/dashboards/CollegeDashboard";
 import { EmployerDashboard } from "@/components/dashboards/EmployerDashboard";
+import { AdminDashboard } from "@/components/dashboards/AdminDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your Khoranex dashboard" },
+      { title: "Your JobSync dashboard" },
       { name: "description", content: "Track applications, interviews and placements in one place." },
-      { property: "og:title", content: "Your Khoranex dashboard" },
+      { property: "og:title", content: "Your JobSync dashboard" },
       { property: "og:description", content: "Track applications, interviews and placements in one place." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -33,8 +34,9 @@ function DashboardPage() {
   }
 
   if (role === "student") return <StudentDashboard userId={user.id} />;
-  if (role === "university") return <UniversityDashboard userId={user.id} />;
+  if (role === "university") return <CollegeDashboard userId={user.id} />;
   if (role === "employer") return <EmployerDashboard userId={user.id} />;
+  if (role === "admin") return <AdminDashboard />;
 
   return (
     <div className="rounded-2xl border border-border bg-card p-8">

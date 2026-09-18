@@ -10,9 +10,9 @@ import { Input } from "@/components/ui/input";
 export const Route = createFileRoute("/_authenticated/interview/$id")({
   head: () => ({
     meta: [
-      { title: "Live interview room | Khoranex" },
+      { title: "Live interview room | JobSync" },
       { name: "description", content: "Join your live in-app interview with video, chat and screen sharing." },
-      { property: "og:title", content: "Live interview room | Khoranex" },
+      { property: "og:title", content: "Live interview room | JobSync" },
       { property: "og:description", content: "Join your live in-app interview with video, chat and screen sharing." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

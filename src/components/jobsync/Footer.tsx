@@ -28,7 +28,7 @@ export function Footer() {
           <div className="max-w-sm">
             <Logo />
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Khoranex enables colleges to automate end-to-end campus placements, helps
+              JobSync enables colleges to automate end-to-end campus placements, helps
               employers hire young talent, and empowers students to access opportunities
               democratically.
             </p>
@@ -95,7 +95,7 @@ export function Footer() {
 
         <div className="mt-14 flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            © 2025-26 Khoranex. All rights reserved.
+            © 2025-26 JobSync. All rights reserved.
           </p>
           <div className="flex gap-6">
             <a href="#contact" className="text-sm text-muted-foreground hover:text-primary">

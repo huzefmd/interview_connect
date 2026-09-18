@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { GraduationCap, Building2, Briefcase, Loader2 } from "lucide-react";
+import { GraduationCap, Building2, Briefcase, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { Logo } from "@/components/khoranex/Logo";
+import { Logo } from "@/components/jobsync/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,16 +14,16 @@ import type { AppRole } from "@/hooks/useAuth";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in or create your Khoranex account" },
+      { title: "Sign in or create your JobSync account" },
       {
         name: "description",
         content:
-          "Log in to Khoranex as a student, university or employer to manage campus placements, jobs and interviews.",
+          "Log in to JobSync as a student, university or employer to manage campus placements, jobs and interviews.",
       },
-      { property: "og:title", content: "Sign in to Khoranex" },
+      { property: "og:title", content: "Sign in to JobSync" },
       {
         property: "og:description",
-        content: "Students, universities and employers sign in here to access their Khoranex dashboard.",
+        content: "Students, universities and employers sign in here to access their JobSync dashboard.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -34,8 +34,9 @@ export const Route = createFileRoute("/auth")({
 
 const roles: { value: AppRole; label: string; icon: typeof GraduationCap; blurb: string }[] = [
   { value: "student", label: "Student", icon: GraduationCap, blurb: "Find jobs & interview" },
-  { value: "university", label: "University", icon: Building2, blurb: "Run placements" },
+  { value: "university", label: "College", icon: Building2, blurb: "Run placements" },
   { value: "employer", label: "Employer", icon: Briefcase, blurb: "Hire campus talent" },
+  { value: "admin", label: "Admin", icon: ShieldCheck, blurb: "Manage system" },
 ];
 
 function AuthPage() {
@@ -49,8 +50,16 @@ function AuthPage() {
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session) {
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.session.user.id)
+          .maybeSingle();
+        const role = roleData?.role || "student";
+        navigate({ to: role === "admin" ? "/admin/dashboard" : "/dashboard", replace: true });
+      }
     });
   }, [navigate]);
 
@@ -79,12 +88,20 @@ function AuthPage() {
           return;
         }
         await ensureRole(data.user!.id, role);
-        navigate({ to: "/dashboard" });
+        navigate({ to: role === "admin" ? "/admin/dashboard" : "/dashboard" });
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        await ensureRole(data.user.id, role);
-        navigate({ to: "/dashboard" });
+
+        // Fetch the actual role from the database instead of relying on the UI selection
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .maybeSingle();
+
+        const actualRole = roleData?.role || "student";
+        navigate({ to: actualRole === "admin" ? "/admin/dashboard" : "/dashboard" });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
@@ -105,7 +122,19 @@ function AuthPage() {
         return;
       }
       if (result.redirected) return;
-      navigate({ to: "/dashboard" });
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        const actualRole = roleData?.role || "student";
+        navigate({ to: actualRole === "admin" ? "/admin/dashboard" : "/dashboard" });
+      } else {
+        navigate({ to: "/dashboard" });
+      }
     } finally {
       setBusy(false);
     }
@@ -136,7 +165,7 @@ function AuthPage() {
             in-app interviews.
           </p>
         </div>
-        <p className="text-sm text-primary-foreground/70">© 2025-26 Khoranex</p>
+        <p className="text-sm text-primary-foreground/70">© 2025-26 JobSync</p>
       </section>
 
       <section className="flex items-center justify-center px-6 py-12">
@@ -190,7 +219,7 @@ function AuthPage() {
                   {mode === "signup" && (
                     <div className="space-y-2">
                       <Label htmlFor="name">
-                        {role === "student" ? "Full name" : "Organization name"}
+                        {role === "student" ? "Full name" : role === "admin" ? "Name" : "Organization name"}
                       </Label>
                       <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={120} />
                     </div>

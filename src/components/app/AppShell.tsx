@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, User, Briefcase, Video, Bell, LogOut, Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser, useMyRole } from "@/hooks/useAuth";
-import { Logo } from "@/components/khoranex/Logo";
+import { Logo } from "@/components/jobsync/Logo";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

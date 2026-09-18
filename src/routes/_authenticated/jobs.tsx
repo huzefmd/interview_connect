@@ -12,13 +12,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/jobs")({
   head: () => ({
     meta: [
-      { title: "Campus jobs on Khoranex" },
+      { title: "Campus jobs on JobSync" },
       { name: "description", content: "Browse and apply to campus roles, or post and manage openings." },
-      { property: "og:title", content: "Campus jobs on Khoranex" },
+      { property: "og:title", content: "Campus jobs on JobSync" },
       { property: "og:description", content: "Browse and apply to campus roles, or post and manage openings." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -31,7 +38,10 @@ function JobsPage() {
   const { user } = useUser();
   const { data: role } = useMyRole(user?.id);
   if (!user || !role) return <Skeleton className="h-96 w-full" />;
-  return role === "employer" ? <EmployerJobs userId={user.id} /> : <StudentJobs userId={user.id} />;
+  if (role === "employer") return <EmployerJobs userId={user.id} />;
+  if (role === "university") return <CollegeJobs userId={user.id} />;
+  if (role === "admin") return <StudentJobs userId={user.id} />;
+  return <StudentJobs userId={user.id} />;
 }
 
 function StudentJobs({ userId }: { userId: string }) {
@@ -57,27 +67,18 @@ function StudentJobs({ userId }: { userId: string }) {
     },
   });
 
-  async function apply(jobId: string, employerId: string, title: string) {
-    const { error } = await supabase.from("applications").insert({ job_id: jobId, student_id: userId });
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    await notify(employerId, "New application", `A student applied to ${title}.`);
-    toast.success("Application submitted");
-    queryClient.invalidateQueries();
-  }
-
   if (isLoading) return <Skeleton className="h-96 w-full" />;
   const jobs = (data?.jobs ?? []).filter(
     (j) => j.title.toLowerCase().includes(q.toLowerCase()) || j.company.toLowerCase().includes(q.toLowerCase()),
   );
 
   return (
-    <div>
-      <PageHeader title="Jobs" subtitle="Roles open to campus talent right now." />
-      <Input placeholder="Search roles or companies" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-sm" />
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+    <div className="space-y-6">
+      <div>
+        <PageHeader title="Jobs" subtitle="Roles open to campus talent right now." />
+        <Input placeholder="Search roles or companies" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-sm mt-4" />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
         {jobs.length === 0 && <p className="text-sm text-muted-foreground">No open roles yet.</p>}
         {jobs.map((j) => {
           const status = data?.applied.get(j.id);
@@ -104,15 +105,131 @@ function StudentJobs({ userId }: { userId: string }) {
                 {status ? (
                   <Badge className="capitalize">{status.replace("_", " ")}</Badge>
                 ) : (
-                  <Button size="sm" onClick={() => apply(j.id, j.employer_id, j.title)}>
-                    Apply now
-                  </Button>
+                  <p className="text-xs text-muted-foreground italic">
+                    Your university will handle your applications for this role.
+                  </p>
                 )}
               </div>
             </article>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function CollegeJobs({ userId }: { userId: string }) {
+  const queryClient = useQueryClient();
+  const [q, setQ] = useState("");
+  const [applyingFor, setApplyingFor] = useState<{ jobId: string; employerId: string; title: string } | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<string>("");
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["university-jobs", userId],
+    queryFn: async () => {
+      const [jobs, students] = await Promise.all([
+        supabase.from("jobs").select("*").eq("is_open", true).order("created_at", { ascending: false }),
+        supabase.from("student_profiles").select("user_id, university_id").eq("university_id", userId),
+      ]);
+      const employerIds = Array.from(new Set((jobs.data ?? []).map((j) => j.employer_id)));
+      const { data: employers } = employerIds.length
+        ? await supabase.from("employer_profiles").select("user_id, company_name").in("user_id", employerIds)
+        : { data: [] };
+      const companyById = new Map((employers ?? []).map((e) => [e.user_id, e.company_name]));
+      const studentProfiles = await supabase.from("profiles").select("id, full_name").in("id", (students.data ?? []).map((s) => s.user_id));
+      const studentNames = new Map((studentProfiles.data ?? []).map((p) => [p.id, p.full_name]));
+
+      return {
+        jobs: (jobs.data ?? []).map((j) => ({ ...j, company: companyById.get(j.employer_id) ?? "Employer" })),
+        students: Array.from((students.data ?? []).map((s) => ({ id: s.user_id, name: studentNames.get(s.user_id) ?? "Unknown Student" }))),
+      };
+    },
+  });
+
+  async function apply(e: React.FormEvent) {
+    e.preventDefault();
+    if (!applyingFor || !selectedStudent) {
+      toast.error("Please select a student");
+      return;
+    }
+    const { error } = await supabase.from("applications").insert({ job_id: applyingFor.jobId, student_id: selectedStudent });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    await notify(applyingFor.employerId, "New application", `A student from your partner university applied to ${applyingFor.title}.`);
+    toast.success("Application submitted on behalf of student");
+    setApplyingFor(null);
+    setSelectedStudent("");
+    queryClient.invalidateQueries();
+  }
+
+  if (isLoading) return <Skeleton className="h-96 w-full" />;
+  const jobs = (data?.jobs ?? []).filter(
+    (j) => j.title.toLowerCase().includes(q.toLowerCase()) || j.company.toLowerCase().includes(q.toLowerCase()),
+  );
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <PageHeader title="College Job Board" subtitle="Find the best roles for your students." />
+        <Input placeholder="Search roles or companies" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-sm mt-4" />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        {jobs.length === 0 && <p className="text-sm text-muted-foreground">No open roles yet.</p>}
+        {jobs.map((j) => (
+          <article key={j.id} className="rounded-2xl border border-border bg-card p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-bold text-foreground">{j.title}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {j.company} · {j.location ?? "Remote"} · {j.job_type}
+                </p>
+              </div>
+              {j.ctc && <Badge variant="secondary">{j.ctc}</Badge>}
+            </div>
+            {j.description && <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{j.description}</p>}
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {j.skills.map((s) => (
+                <Badge key={s} variant="outline">
+                  {s}
+                </Badge>
+              ))}
+            </div>
+            <div className="mt-5">
+              <Button size="sm" onClick={() => setApplyingFor({ jobId: j.id, employerId: j.employer_id, title: j.title })}>
+                Apply for a student
+              </Button>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <Dialog open={!!applyingFor} onOpenChange={(open) => { if (!open) setApplyingFor(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Apply for {applyingFor?.title}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={apply} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Select Student</Label>
+              <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a student" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(data?.students ?? []).map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button type="submit" className="w-full">Submit Application</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
